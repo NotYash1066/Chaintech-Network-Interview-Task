@@ -3,6 +3,8 @@ import toast from 'react-hot-toast'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../components/button'
 import { InputField } from '../components/input-field'
+import { AuthFormErrorBanner } from '../features/auth/components/auth-form-error-banner'
+import { useAuthFormState } from '../features/auth/hooks/use-auth-form-state'
 import { useAuth } from '../features/auth/use-auth'
 import { APP_ROUTES } from '../lib/constants'
 import { validateLoginInput } from '../lib/validation'
@@ -13,8 +15,8 @@ export function LoginPage() {
   const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { error, finishSubmitting, isSubmitting, showError, startSubmitting } =
+    useAuthFormState()
 
   const from = location.state?.from ?? APP_ROUTES.dashboard
 
@@ -24,19 +26,18 @@ export function LoginPage() {
     const validationError = validateLoginInput({ email, password })
 
     if (validationError) {
-      setError(validationError)
+      showError(validationError)
       return
     }
 
-    setIsSubmitting(true)
-    setError(null)
+    startSubmitting()
 
     const result = login({ email, password })
 
-    setIsSubmitting(false)
+    finishSubmitting()
 
     if (!result.success) {
-      setError(result.message)
+      showError(result.message)
       toast.error(result.message)
       return
     }
@@ -75,11 +76,7 @@ export function LoginPage() {
           type="password"
           value={password}
         />
-        {error ? (
-          <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            {error}
-          </p>
-        ) : null}
+        <AuthFormErrorBanner message={error} />
         <Button fullWidth type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Signing in...' : 'Login'}
         </Button>
