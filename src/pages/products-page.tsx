@@ -1,12 +1,11 @@
 import { startTransition, useDeferredValue, useMemo, useState } from 'react'
-import { ProductCard } from '../components/product-card'
-import { EmptyState } from '../components/empty-state'
-import { ErrorState } from '../components/error-state'
-import { LoadingGrid } from '../components/loading-grid'
 import { useCart } from '../features/cart/use-cart'
+import { ProductsCategoryChips } from '../features/products/components/products-category-chips'
+import { ProductsFilters } from '../features/products/components/products-filters'
+import { ProductsResults } from '../features/products/components/products-results'
+import { filterProducts } from '../features/products/filter-products'
 import { useProducts } from '../features/products/use-products'
 import { useDebouncedValue } from '../lib/use-debounced-value'
-import { formatCategoryLabel } from '../lib/utils'
 
 export function ProductsPage() {
   const { addItem } = useCart()
@@ -18,18 +17,24 @@ export function ProductsPage() {
   const deferredSearch = useDeferredValue(debouncedSearch)
 
   const filteredProducts = useMemo(() => {
-    const normalizedSearch = deferredSearch.trim().toLowerCase()
-
-    return products.filter((product) => {
-      const matchesCategory =
-        selectedCategory === 'all' || product.category === selectedCategory
-      const matchesSearch =
-        normalizedSearch.length === 0 ||
-        product.title.toLowerCase().includes(normalizedSearch)
-
-      return matchesCategory && matchesSearch
+    return filterProducts({
+      products,
+      searchTerm: deferredSearch,
+      selectedCategory,
     })
   }, [deferredSearch, products, selectedCategory])
+
+  const handleSearchChange = (nextSearchTerm: string) => {
+    startTransition(() => setSearchTerm(nextSearchTerm))
+  }
+
+  const handleCategoryChange = (nextCategory: string) => {
+    startTransition(() => setSelectedCategory(nextCategory))
+  }
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category)
+  }
 
   return (
     <div className="space-y-6">
@@ -48,93 +53,31 @@ export function ProductsPage() {
             </p>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,320px)_200px]">
-            <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-              Search
-              <input
-                className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm outline-none transition focus:border-accent-500 focus:ring-2 focus:ring-accent-100"
-                onChange={(event) =>
-                  startTransition(() => setSearchTerm(event.target.value))
-                }
-                placeholder="Search by product title"
-                value={searchTerm}
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-              Category
-              <select
-                className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm outline-none transition focus:border-accent-500 focus:ring-2 focus:ring-accent-100"
-                onChange={(event) =>
-                  startTransition(() => setSelectedCategory(event.target.value))
-                }
-                value={selectedCategory}
-              >
-                <option value="all">All categories</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {formatCategoryLabel(category)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+          <ProductsFilters
+            categories={categories}
+            onCategoryChange={handleCategoryChange}
+            onSearchChange={handleSearchChange}
+            searchTerm={searchTerm}
+            selectedCategory={selectedCategory}
+          />
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-2">
-          <button
-            className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition ${
-              selectedCategory === 'all'
-                ? 'bg-ink text-white'
-                : 'border border-slate-200 bg-white text-slate-600 hover:border-accent-200 hover:text-accent-700'
-            }`}
-            onClick={() => setSelectedCategory('all')}
-            type="button"
-          >
-            All
-          </button>
-          {categories.map((category) => (
-            <button
-              className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition ${
-                selectedCategory === category
-                  ? 'bg-ink text-white'
-                  : 'border border-slate-200 bg-white text-slate-600 hover:border-accent-200 hover:text-accent-700'
-              }`}
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              type="button"
-            >
-              {formatCategoryLabel(category)}
-            </button>
-          ))}
-        </div>
+        <ProductsCategoryChips
+          categories={categories}
+          onSelectCategory={handleCategorySelect}
+          selectedCategory={selectedCategory}
+        />
       </section>
 
-      {isLoading ? <LoadingGrid /> : null}
-
-      {!isLoading && error ? (
-        <ErrorState
-          description={error}
-          onRetry={() => {
-            void retry()
-          }}
-          title="Unable to load the catalog"
-        />
-      ) : null}
-
-      {!isLoading && !error && filteredProducts.length === 0 ? (
-        <EmptyState
-          description="Try a different product title or category filter to surface more items."
-          title="No products matched your filters"
-        />
-      ) : null}
-
-      {!isLoading && !error && filteredProducts.length > 0 ? (
-        <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} onAddToCart={addItem} product={product} />
-          ))}
-        </section>
-      ) : null}
+      <ProductsResults
+        error={error}
+        isLoading={isLoading}
+        onAddToCart={addItem}
+        onRetry={() => {
+          void retry()
+        }}
+        products={filteredProducts}
+      />
     </div>
   )
 }
