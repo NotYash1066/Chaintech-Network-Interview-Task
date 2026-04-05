@@ -156,6 +156,24 @@ describe('app integration flows', () => {
     await screen.findByText(/hi alex morgan/i)
   })
 
+  it('returns users to their originally requested protected route after login', async () => {
+    const user = userEvent.setup()
+    seedUsers([primaryUser])
+
+    renderApp(['/dashboard/profile'])
+
+    await screen.findByRole('heading', { name: /access your dashboard/i })
+
+    await user.type(screen.getByLabelText(/email/i), primaryUser.email)
+    await user.type(screen.getByLabelText(/password/i), primaryUser.password)
+    await user.click(screen.getByRole('button', { name: /login/i }))
+
+    await screen.findByRole('heading', { name: /edit your profile/i })
+    expect(
+      screen.queryByRole('heading', { name: /hi alex morgan/i }),
+    ).not.toBeInTheDocument()
+  })
+
   it('redirects expired sessions back to login', async () => {
     seedUsers([primaryUser])
     seedSession(primaryUser.id, Date.now() - 1_000)
