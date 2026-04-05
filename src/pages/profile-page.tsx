@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react'
 import toast from 'react-hot-toast'
 import { Button } from '../components/button'
 import { InputField } from '../components/input-field'
+import { AuthFormErrorBanner } from '../features/auth/components/auth-form-error-banner'
+import { useAuthFormState } from '../features/auth/hooks/use-auth-form-state'
 import { useAuth } from '../features/auth/use-auth'
 import { validateProfileInput } from '../lib/validation'
 
@@ -10,8 +12,8 @@ function ProfileForm() {
   const [name, setName] = useState(() => user?.name ?? '')
   const [email, setEmail] = useState(() => user?.email ?? '')
   const [password, setPassword] = useState(() => user?.password ?? '')
-  const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { error, finishSubmitting, isSubmitting, showError, startSubmitting } =
+    useAuthFormState()
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -19,19 +21,18 @@ function ProfileForm() {
     const validationError = validateProfileInput({ email, name, password })
 
     if (validationError) {
-      setError(validationError)
+      showError(validationError)
       return
     }
 
-    setIsSubmitting(true)
-    setError(null)
+    startSubmitting()
 
     const result = updateProfile({ email, name, password })
 
-    setIsSubmitting(false)
+    finishSubmitting()
 
     if (!result.success) {
-      setError(result.message)
+      showError(result.message)
       toast.error(result.message)
       return
     }
@@ -59,11 +60,7 @@ function ProfileForm() {
         type="password"
         value={password}
       />
-      {error ? (
-        <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-          {error}
-        </p>
-      ) : null}
+      <AuthFormErrorBanner message={error} />
       <Button disabled={isSubmitting} type="submit">
         {isSubmitting ? 'Saving...' : 'Save changes'}
       </Button>
