@@ -252,8 +252,8 @@ describe('app integration flows', () => {
 
     await screen.findByText('Phone Case')
 
-    const incrementButton = screen.getByRole('button', { name: '+' })
-    const decrementButton = screen.getByRole('button', { name: '-' })
+    const incrementButton = screen.getByRole('button', { name: /Increase quantity/i })
+    const decrementButton = screen.getByRole('button', { name: /Decrease quantity/i })
 
     await user.click(incrementButton)
     expect(screen.getByText('₹9,036.58')).toBeInTheDocument()

@@ -41,16 +41,19 @@ export function CartItemRow({
       <div className="flex flex-col items-start justify-between gap-4 sm:items-end">
         <div className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
           <button
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-700 transition hover:border-accent-200 hover:text-accent-700"
+            aria-label={`Decrease quantity of ${item.title}`}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-700 transition hover:border-accent-200 hover:text-accent-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-slate-200 disabled:hover:text-slate-700"
+            disabled={item.quantity <= 1}
             onClick={() => decreaseQty(item.productId)}
             type="button"
           >
             -
           </button>
-          <span className="min-w-8 text-center text-sm font-semibold text-slate-900">
+          <span aria-live="polite" className="min-w-8 text-center text-sm font-semibold text-slate-900">
             {item.quantity}
           </span>
           <button
+            aria-label={`Increase quantity of ${item.title}`}
             className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-700 transition hover:border-accent-200 hover:text-accent-700"
             onClick={() => increaseQty(item.productId)}
             type="button"
@@ -60,6 +63,7 @@ export function CartItemRow({
         </div>
 
         <Button
+          aria-label={`Remove ${item.title} from cart`}
           className="text-rose-600 hover:bg-rose-50 hover:text-rose-700"
           onClick={() => removeItem(item.productId)}
           variant="ghost"

@@ -14,6 +14,7 @@ export function ProductsCategoryChips({
   return (
     <div className="mt-6 flex flex-wrap gap-2">
       <button
+        aria-pressed={selectedCategory === 'all'}
         className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition ${
           selectedCategory === 'all'
             ? 'bg-ink text-white'
@@ -26,6 +27,7 @@ export function ProductsCategoryChips({
       </button>
       {categories.map((category) => (
         <button
+          aria-pressed={selectedCategory === category}
           className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition ${
             selectedCategory === category
               ? 'bg-ink text-white'

@@ -1,0 +1,3 @@
+## 2024-06-18 - ARIA labels for icon-only components
+**Learning:** Adding ARIA labels for functional elements like quantity adjustment (+ / -) in cart logic is crucial. Relying on `+` and `-` strings within icon buttons causes significant accessibility issues. Additionally, combining ARIA labels with `disabled` UI states (with reduced opacity) gives users strong visual bounds. I noticed the UI correctly tracks `aria-pressed` for selection buttons (like category chips), so applying both `aria-label` and visual states are important UX improvements.
+**Action:** Always add clear, contextual `aria-label` to buttons relying on icons or plain text mathematical symbols. Ensure disabled buttons have clear contrast reduction.
