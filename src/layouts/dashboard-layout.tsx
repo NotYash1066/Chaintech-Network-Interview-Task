@@ -128,6 +128,8 @@ export function DashboardLayout() {
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex min-w-0 items-center gap-3">
               <button
+                aria-expanded={isMobileMenuOpen}
+                aria-label="Toggle mobile menu"
                 className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-soft lg:hidden"
                 onClick={() => setIsMobileMenuOpen(true)}
                 type="button"

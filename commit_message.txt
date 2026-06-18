@@ -1,0 +1,18 @@
+🎨 Palette: Add A11y & visual bounds to cart and nav
+
+💡 What:
+- Added `aria-label` attributes to the cart row quantity buttons (+ / -).
+- Disabled the quantity decrease button when `quantity <= 1` with visual feedback (`disabled:opacity-50`, `disabled:cursor-not-allowed`).
+- Added `aria-live="polite"` to the quantity text display in the cart.
+- Added `aria-label` and `aria-expanded` to the mobile dashboard toggle.
+- Added `aria-pressed` states to product category chip buttons to denote selection.
+- Fixed `app.integration.test.tsx` to query buttons by the new `aria-label`s instead of raw text.
+
+🎯 Why:
+Screen readers heavily rely on `aria-label` to decipher icon-only interactive elements and symbols like "+" and "-". Also, letting users click a decrease button when the quantity is at its minimum bound is poor UX; disabling it explicitly is clearer.
+
+📸 Before/After:
+Nav buttons, category chips and cart buttons can now be queried by screen readers. The cart's quantity decrease button now accurately signals its minimum boundary.
+
+♿ Accessibility:
+Significantly improves context for screen readers for interactive navigation and cart modifications.
